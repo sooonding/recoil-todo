@@ -1,131 +1,50 @@
-import { getValue } from '@testing-library/user-event/dist/utils';
-import React, { useState } from 'react';
-
-import { useForm } from 'react-hook-form';
-import styled from 'styled-components';
-
-const ErrorMsg = styled.span`
-  color: red;
-`;
-
-/* export default function TodoList() {
-  const [todo, setTodo] = useState('');
-  const onChange = (event: React.FormEvent<HTMLInputElement>) => {
-    const {
-      currentTarget: { value },
-    } = event;
-    setTodo(value);
-  };
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log(todo);
-  };
-
-  return (
-    <div>
-      <form onSubmit={onSubmit}>
-        <input value={todo} onChange={onChange} placeholder="Write a to do" />
-        <button>Add</button>
-      </form>
-    </div>
-  );
-} */
-
-interface IForm {
-  //NOTE: 받아오는 input name을 가져온다.
-  todo: string;
-  email: string;
-  password: string;
-  //필수항목이 아닌것
-  password1: string;
-  //전체 form에 대한 에러를 나타내기 위해 항목을 추가한다.
-  extraError?: string;
-  todo1?: string;
-}
-
-//ANCHOR : react-hook-form 사용
+import React from 'react';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { categoryState, toDoSelectors, toDoState } from '../atoms';
+import CreateToDo from './CreateToDo';
+import ToDo from './ToDo';
 
 export default function TodoList() {
-  //NOTE: error를 렌더하기위해 formState를 한번 더 구조분해 할당 합니다.
-  const {
-    register,
-    watch,
-    handleSubmit,
-    formState: { errors },
-    setError,
-    //NOTE: defaultValues는 해당 input의 기본값을 적어 놓은것
-  } = useForm<IForm>();
+  //   const [toDo, done, doing] = useRecoilValue(toDoSelectors); // return값은 배열
+  const [category, setCategory] = useRecoilState(categoryState);
+  const todos = useRecoilValue(toDoSelectors);
 
-  const onValid = (data: IForm) => {
-    console.log(data, 'ADD');
-    if (data.password !== data.password1) {
-      setError('password1', { message: '패스워드가 동일하지 않습니다.' }, { shouldFocus: true });
-    }
-    //NOTE: 특정 항목에 해당하는 에러가 아닌 전체 form에 대한 에러
-    // setError('extraError', { message: 'Server offline.' });
+  /*
+  NOTE: useRecoilState함수는 value modifier함수를 반환
+  React State hook과 굉장히 비슷 value와 value변경함수를 둘 다 얻고 싶다면 useRecoilState hook을 사용하자
+  */
+  // 현재의 todo가 "ITodo 객체로 이루어진 배열"임을 알고있다.
+  //   const [todos, setTodos] = useRecoilState(toDoState);
+
+  //   //atom의 값을 불러오기
+  //   const todos = useRecoilValue(toDoState);
+  //   //atom 값을 수정하는 함수 불러오기
+  //   const modFn = useSetRecoilState(toDoState);
+
+  //NOTE: select option의 변화 감지 함수
+  const onInput = (event: React.FormEvent<HTMLSelectElement>) => {
+    setCategory(event.currentTarget.value);
   };
+  console.log(todos, 'todos');
+  console.log(category, 'category');
 
   return (
     <div>
-      <form onSubmit={handleSubmit(onValid)} style={{ display: 'flex', flexDirection: 'column' }}>
-        {/*
-        NOTE: 특정단어에 대해 경고를 내고 싶다면 validate 함수를 사용한다.  
-        validate 함수는 리턴값은 true/false이며 true면 검증이 통과된다.
-        */}
-        <input
-          {...register('todo', {
-            required: 'write here',
-            validate: value =>
-              value.includes('seongjin') ? 'seongjin은 포함할 수 없습니다.' : true,
-          })}
-          placeholder="input in value.."
-        />
-        <ErrorMsg>{errors?.todo?.message}</ErrorMsg>
-        {/*
-        NOTE: validate는 함수로 표현할 수 있지만 input에 많은 validation이 필요하다면 객체로도 가능
-        */}
-        <input
-          {...register('todo1', {
-            required: 'write here',
-            validate: {
-              noSeong: value => (value?.includes('seong') ? 'no word allowed' : true),
-              noNick: value => (value?.includes('nick') ? 'no nick allow' : true),
-            },
-          })}
-          placeholder="input in value.."
-        />
-        <ErrorMsg>{errors?.todo?.message}</ErrorMsg>
-
-        <input
-          {...register('password', {
-            required: 'password is require',
-            minLength: { value: 2, message: '5자 이하는 통과하지 못합니다.' },
-          })}
-          placeholder="password"
-        />
-        <ErrorMsg>{errors?.password?.message}</ErrorMsg>
-        <input
-          {...register('password1', {
-            required: 'password is require',
-            minLength: { value: 2, message: '5자 이하는 통과하지 못합니다.' },
-          })}
-          placeholder="password1"
-        />
-        <ErrorMsg>{errors?.password1?.message}</ErrorMsg>
-        <input
-          {...register('email', {
-            required: 'Email is required',
-            pattern: {
-              value: /^[A-Za-z0-9._%+-]+@naver.com$/,
-              message: '해당 이메일 양식이 옳지 않습니다.',
-            },
-          })}
-          placeholder="input in value.."
-        />
-        <ErrorMsg>{errors?.email?.message}</ErrorMsg>
-        <button>Add</button>
-        <ErrorMsg>{errors?.extraError?.message}</ErrorMsg>
-      </form>
+      <h1>To dos</h1>
+      <hr />
+      {/* NOTE: value를 넣는 이유는 event.currentTarget.value를 할 때 해당값이 나온다.*/}
+      <select style={{ fontSize: '20px', margin: '20px' }} value={category} onInput={onInput}>
+        <option value="TO_DO">To Do</option>
+        <option value="DOING">Doing</option>
+        <option value="DONE">Done</option>
+      </select>
+      <CreateToDo />
+      {todos?.map(todo => {
+        return <ToDo key={todo.id} {...todo} />;
+      })}
+      {/* {category === "TO_DO" && toDo.map(todo => )}
+      {category === "DOING" && doing.map(todo => )}
+      {category === "DONE" && done.map(todo => )} */}
     </div>
   );
 }
