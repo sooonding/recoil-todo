@@ -1,12 +1,12 @@
 import React from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { categoryState, toDoSelectors, toDoState } from '../atoms';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { Categories, categoryState, toDoSelectors } from '../atoms';
 import CreateToDo from './CreateToDo';
+import SelectForm from './SelectForm';
 import ToDo from './ToDo';
 
 export default function TodoList() {
   //   const [toDo, done, doing] = useRecoilValue(toDoSelectors); // return값은 배열
-  const [category, setCategory] = useRecoilState(categoryState);
   const todos = useRecoilValue(toDoSelectors);
 
   /*
@@ -21,30 +21,22 @@ export default function TodoList() {
   //   //atom 값을 수정하는 함수 불러오기
   //   const modFn = useSetRecoilState(toDoState);
 
-  //NOTE: select option의 변화 감지 함수
-  const onInput = (event: React.FormEvent<HTMLSelectElement>) => {
-    setCategory(event.currentTarget.value);
-  };
-  console.log(todos, 'todos');
-  console.log(category, 'category');
-
   return (
     <div>
       <h1>To dos</h1>
       <hr />
       {/* NOTE: value를 넣는 이유는 event.currentTarget.value를 할 때 해당값이 나온다.*/}
-      <select style={{ fontSize: '20px', margin: '20px' }} value={category} onInput={onInput}>
-        <option value="TO_DO">To Do</option>
-        <option value="DOING">Doing</option>
-        <option value="DONE">Done</option>
-      </select>
+      {/* <select style={{ fontSize: '20px', margin: '20px' }} value={category} onInput={onInput}>
+        <option value={Categories.TO_DO}>To Do</option>
+        <option value={Categories.DOING}>Doing</option>
+        <option value={Categories.DONE}>Done</option>
+      </select> */}
+      <SelectForm />
       <CreateToDo />
+
       {todos?.map(todo => {
         return <ToDo key={todo.id} {...todo} />;
       })}
-      {/* {category === "TO_DO" && toDo.map(todo => )}
-      {category === "DOING" && doing.map(todo => )}
-      {category === "DONE" && done.map(todo => )} */}
     </div>
   );
 }

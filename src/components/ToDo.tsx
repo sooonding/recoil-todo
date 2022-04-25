@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSetRecoilState } from 'recoil';
-import { ITodo, toDoState } from '../atoms';
+import { json } from 'stream/consumers';
+import { Categories, ITodo, TODO, toDoState } from '../atoms';
 
 export default function ToDo({ text, category, id }: ITodo) {
   const setTodo = useSetRecoilState(toDoState);
@@ -16,8 +17,9 @@ export default function ToDo({ text, category, id }: ITodo) {
     setTodo(oldTodo => {
       const findTodo = oldTodo.findIndex(todo => id === todo.id);
       //NOTE: as any는 타입스크립트에게 체크하지 말라는 말
-      const newTodo = { text, category: name as ITodo['category'], id };
+      const newTodo = { text, category: name as Categories, id };
       const result = [...oldTodo.slice(0, findTodo), newTodo, ...oldTodo.slice(findTodo + 1)];
+      localStorage.setItem(TODO, JSON.stringify(result));
       return result;
 
       // ANCHOR: splice로 처리할수도 있다.
@@ -27,24 +29,33 @@ export default function ToDo({ text, category, id }: ITodo) {
     });
   };
 
+  const onDelete = (id: ITodo['id']) => {
+    setTodo(oldTodo => {
+      const deleteItem = oldTodo.filter(el => el.id !== id);
+      localStorage.setItem(TODO, JSON.stringify(deleteItem));
+      return deleteItem;
+    });
+  };
+
   return (
     <li>
       <span>{text}</span>
-      {category !== 'TO_DO' && (
-        <button name="TO_DO" onClick={onClick}>
+      {category !== Categories.TO_DO && (
+        <button name={Categories.TO_DO} onClick={onClick}>
           To do
         </button>
       )}
-      {category !== 'DONE' && (
-        <button name="DONE" onClick={onClick}>
+      {category !== Categories.DONE && (
+        <button name={Categories.DONE} onClick={onClick}>
           done
         </button>
       )}
-      {category !== 'DOING' && (
-        <button name="DOING" onClick={onClick}>
+      {category !== Categories.DOING && (
+        <button name={Categories.DOING} onClick={onClick}>
           doing
         </button>
       )}
+      <button onClick={() => onDelete(id)}>delete</button>
     </li>
   );
 }
