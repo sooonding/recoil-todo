@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useSetRecoilState } from 'recoil';
-import { toDoState } from '../atoms';
+import { SetterOrUpdater, useRecoilValue, useSetRecoilState } from 'recoil';
+import { categoryState, ITodo, TODO, toDoState } from '../atoms';
 
 export interface IForm {
   toDo: string;
@@ -17,7 +17,10 @@ export default function CreateToDo() {
 
   //state 수정함수만 필요
   const setTodos = useSetRecoilState(toDoState);
+  const todos = useRecoilValue(toDoState);
+  const cate = useRecoilValue(categoryState);
 
+  console.log([...todos], '[]TODOS');
   const onSubmit = (data: IForm) => {
     /* NOTE: 
      atom 수정함수는 두개의 동작을 할 수 있다.
@@ -25,9 +28,10 @@ export default function CreateToDo() {
      2. 함수를 사용 함수의 리턴값이 새로운 state가 된다.
      기존의 setState처럼 불변성을 유지해줘야 한다.
      */
-
-    setTodos(oldTodo => [{ text: data.toDo, category: 'TO_DO', id: Date.now() }, ...oldTodo]);
+    const newTodo = { text: data.toDo, category: cate, id: Date.now() };
+    setTodos(oldTodo => [{ text: data.toDo, category: cate, id: Date.now() }, ...oldTodo]);
     setValue('toDo', '');
+    localStorage.setItem(TODO, JSON.stringify([...todos, newTodo]));
   };
 
   return (
