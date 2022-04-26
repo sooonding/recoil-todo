@@ -55,3 +55,11 @@ export const toDoSelectors = selector({
     return toDos.filter(item => item.category === category);
   },
 });
+
+// const userGetTodo = localStorage.getItem(USERTODOLIST_KEY);
+// const parseTodo = JSON.parse(userGetTodo as string);
+
+// export const toDoState = atom<IToDo[]>({
+//   key: "toDo",
+//   default: userGetTodo !== null ? parseTodo : [],
+// });
